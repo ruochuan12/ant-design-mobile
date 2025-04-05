@@ -69,6 +69,17 @@ describe('TextArea', () => {
     expect(count).toHaveTextContent('5/5')
   })
 
+  test('limit count with emojis', () => {
+    const { getByRole } = render(
+      <TextArea defaultValue='🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁵󠁳󠁷󠁡󠁿🏴' maxLength={3} showCount />
+    )
+    const textarea = getByRole('textbox') as HTMLTextAreaElement
+    const count = document.querySelectorAll(`.${classPrefix}-count`)[0]
+    fireEvent.change(textarea, { target: { value: '🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁵󠁳󠁷󠁡󠁿🏴🏴󠁵󠁳󠁴󠁸󠁿' } })
+    expect(textarea.value).toBe('🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁵󠁳󠁷󠁡󠁿🏴')
+    expect(count).toHaveTextContent('3/3')
+  })
+
   test('should exceed maxLength when use IME', () => {
     const onChange = jest.fn()
     const { getByRole } = render(<TextArea maxLength={1} onChange={onChange} />)
@@ -108,5 +119,50 @@ describe('TextArea', () => {
       />
     )
     expect(getByText('(3,5)')).toBeInTheDocument()
+  })
+
+  test('set rows should be work', () => {
+    const { getByRole } = render(<TextArea rows={1} autoSize />)
+    const hiddenTextarea = document.querySelector(
+      `.${classPrefix}-element-hidden`
+    )!
+    const textarea = getByRole('textbox')
+    expect(textarea).toHaveAttribute('rows', '1')
+    expect(hiddenTextarea).toHaveAttribute('rows', '1')
+  })
+
+  test('rows should be the minRows when rows < minRows', () => {
+    const { getByRole } = render(<TextArea autoSize={{ minRows: 3 }} />)
+    const textarea = getByRole('textbox')
+    expect(textarea).toHaveAttribute('rows', '3')
+  })
+
+  test('rows should be the maxRows when rows > maxRows', () => {
+    const { getByRole } = render(<TextArea autoSize={{ maxRows: 1 }} />)
+    const textarea = getByRole('textbox')
+    expect(textarea).toHaveAttribute('rows', '1')
+  })
+
+  test('should works with `onEnterPress`', async () => {
+    const onEnterPress = jest.fn()
+    const { getByRole } = render(
+      <TextArea defaultValue={'testValue'} onEnterPress={onEnterPress} />
+    )
+    const textarea = getByRole('textbox') as HTMLTextAreaElement
+    expect(textarea).toBeInTheDocument()
+    act(() => {
+      textarea.focus()
+    })
+    fireEvent.keyDown(textarea, { code: 'Enter' })
+    expect(onEnterPress).toBeCalledTimes(1)
+    fireEvent.keyUp(textarea, { code: 'Enter' })
+
+    fireEvent.keyDown(textarea, { keyCode: 13 })
+    expect(onEnterPress).toBeCalledTimes(2)
+    fireEvent.keyUp(textarea, { keyCode: 13 })
+
+    fireEvent.keyDown(textarea, { keyCode: 14 })
+    expect(onEnterPress).toBeCalledTimes(2)
+    fireEvent.keyUp(textarea, { keyCode: 14 })
   })
 })

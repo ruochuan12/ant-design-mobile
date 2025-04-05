@@ -6,14 +6,13 @@ const typeTemplate = '${label}Pas un valide${type}'
 const frFR = mergeLocale(base, {
   locale: 'fr-FR',
   common: {
-    confirm: 'Valider',
+    confirm: 'Activer',
     cancel: 'Annuler',
     loading: 'Chargement',
   },
   Calendar: {
     markItems: ['un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept'],
-    renderYearAndMonth: (year: number, month: number) =>
-      `${year}Année ${month}Mois`,
+    yearAndMonth: '${year}Année ${month}Mois',
   },
   Cascader: {
     placeholder: 'Veuillez sélectionner',

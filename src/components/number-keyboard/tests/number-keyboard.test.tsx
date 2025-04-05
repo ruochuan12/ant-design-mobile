@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { fireEvent, render, testA11y, screen, waitFor } from 'testing'
+import { fireEvent, render, screen, testA11y, waitFor } from 'testing'
 import NumberKeyboard from '..'
 
 const classPrefix = 'adm-number-keyboard'
@@ -10,7 +10,17 @@ function mockClick(el: HTMLElement) {
 }
 
 describe('NumberKeyboard', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.clearAllTimers()
+    jest.useRealTimers()
+  })
+
   test('a11y', async () => {
+    jest.useRealTimers()
     await testA11y(<NumberKeyboard visible />)
   })
 
@@ -27,7 +37,8 @@ describe('NumberKeyboard', () => {
   test('onClose should be called by close button', () => {
     const onClose = jest.fn()
     render(<NumberKeyboard visible onClose={onClose} />)
-    fireEvent.click(screen.getByTitle('CLOSE'))
+
+    fireEvent.click(screen.getByTitle('关闭'))
     expect(onClose).toBeCalledTimes(1)
   })
 
@@ -75,7 +86,7 @@ describe('NumberKeyboard', () => {
       />
     )
     const confirm = screen.getByText('confirm')
-    const del = screen.getByTitle('BACKSPACE')
+    const del = screen.getByTitle('清除')
     expect(confirm).toBeInTheDocument()
     expect(confirm).toHaveClass(
       `${classPrefix}-key-extra ${classPrefix}-key-ok`
@@ -118,7 +129,7 @@ describe('NumberKeyboard', () => {
     const popup = document.querySelector(`.${classPrefix}-popup`)
     const main = document.querySelector(`.${classPrefix}-main`)
     expect(main).not.toHaveTextContent('1234567890')
-    fireEvent.click(screen.getByTitle('CLOSE'))
+    fireEvent.click(screen.getByTitle('关闭'))
     await waitFor(() => expect(popup).not.toBeVisible())
   })
 
@@ -158,5 +169,35 @@ describe('NumberKeyboard', () => {
     expect(left).toBeInTheDocument()
     expect(right).toBeInTheDocument()
     expect(screen.getByTitle('0')).not.toHaveClass(`${classPrefix}-key-mid`)
+  })
+
+  test('long press backspace and release', () => {
+    const onDelete = jest.fn()
+    const { container } = render(<NumberKeyboard visible onDelete={onDelete} />)
+
+    // Fire touchstart event
+    fireEvent.touchStart(
+      document.body.querySelector(
+        '.adm-number-keyboard-key-sign'
+      ) as HTMLDivElement,
+      { touches: [{}] }
+    )
+    onDelete.mockReset()
+
+    jest.advanceTimersByTime(10000)
+    expect(onDelete).toHaveBeenCalled()
+    onDelete.mockReset()
+
+    // We do not fire touchend event to mock ISO missing touchend event
+    // Press other key
+    fireEvent.touchStart(
+      document.body.querySelector(
+        '.adm-number-keyboard-key-number'
+      ) as HTMLDivElement,
+      { touches: [{}] }
+    )
+
+    jest.advanceTimersByTime(10000)
+    expect(onDelete).not.toHaveBeenCalled()
   })
 })

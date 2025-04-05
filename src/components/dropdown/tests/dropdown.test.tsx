@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { fireEvent, render, screen, waitFor } from 'testing'
 import Dropdown from '..'
 
@@ -55,6 +55,24 @@ describe('Dropdown', () => {
     expect(screen.getByText(1)).toBeInTheDocument()
   })
 
+  test('rendered to the current node', async () => {
+    const { getByText, container } = render(
+      <Dropdown getContainer={null}>
+        <Dropdown.Item key='bizop' title='Item'>
+          <div style={{ padding: 12 }}>内容</div>
+        </Dropdown.Item>
+      </Dropdown>
+    )
+
+    fireEvent.click(getByText('Item'))
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(`.${classPrefix} .${classPrefix}-popup`)[0]
+      ).toBeTruthy()
+    })
+  })
+
   test('forceRender should be work', () => {
     render(
       <Dropdown data-testid='dropdown'>
@@ -64,5 +82,72 @@ describe('Dropdown', () => {
       </Dropdown>
     )
     expect(screen.getByText('content')).toBeInTheDocument()
+  })
+
+  test('trigger the click of Dropdown.Item ', () => {
+    const ClickTest = () => {
+      const [count, setCount] = useState(0)
+      return (
+        <Dropdown>
+          <Dropdown.Item
+            onClick={() => setCount(count + 1)}
+            title='sorter'
+            key='sorter'
+          >
+            click{count}
+          </Dropdown.Item>
+        </Dropdown>
+      )
+    }
+
+    render(<ClickTest />)
+
+    fireEvent.click(screen.getByText('sorter'))
+    expect(screen.getByText('click1'))
+    fireEvent.click(screen.getByText('sorter'))
+    expect(screen.getByText('click2'))
+  })
+
+  describe('arrow', () => {
+    it('Dropdown - arrow', () => {
+      render(
+        <Dropdown arrow='little'>
+          <Dropdown.Item title='sorter' key='sorter' />
+        </Dropdown>
+      )
+      expect(screen.getByText('little')).toBeVisible()
+    })
+
+    it('Dropdown - arrowIcon', () => {
+      render(
+        <Dropdown arrowIcon='bamboo' arrow='little'>
+          <Dropdown.Item title='sorter' key='sorter' />
+        </Dropdown>
+      )
+      expect(screen.getByText('bamboo')).toBeVisible()
+    })
+
+    it('Dropdown.Item - arrow', () => {
+      render(
+        <Dropdown arrowIcon='ignore' arrow='ignore'>
+          <Dropdown.Item title='sorter' key='sorter' arrow='little' />
+        </Dropdown>
+      )
+      expect(screen.getByText('little')).toBeVisible()
+    })
+
+    it('Dropdown.Item - arrowIcon', () => {
+      render(
+        <Dropdown arrowIcon='ignore' arrow='ignore'>
+          <Dropdown.Item
+            title='sorter'
+            key='sorter'
+            arrow='little'
+            arrowIcon='bamboo'
+          />
+        </Dropdown>
+      )
+      expect(screen.getByText('bamboo')).toBeVisible()
+    })
   })
 })

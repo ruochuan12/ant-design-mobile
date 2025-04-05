@@ -10,6 +10,8 @@
 /report.json
 /report.html
 
+~*
+
 # build
 /dist/
 /lib/
@@ -20,7 +22,6 @@
 # dumi assets meta data
 /assets.json
 
-/.vscode/
 /.idea/
 
 # yarn https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
@@ -31,3 +32,5 @@
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+
+bun.lockb

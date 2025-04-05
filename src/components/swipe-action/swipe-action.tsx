@@ -1,27 +1,29 @@
+import { animated, useSpring } from '@react-spring/web'
+import { useDrag } from '@use-gesture/react'
+import type { ReactNode } from 'react'
 import React, {
   forwardRef,
-  ReactNode,
   RefObject,
   useEffect,
   useImperativeHandle,
   useRef,
 } from 'react'
-import { mergeProps } from '../../utils/with-default-props'
-import { useSpring, animated } from '@react-spring/web'
-import { useDrag } from '@use-gesture/react'
-import Button from '../button'
-import { nearest } from '../../utils/nearest'
 import { NativeProps, withNativeProps } from '../../utils/native-props'
+import { nearest } from '../../utils/nearest'
+import { mergeProps } from '../../utils/with-default-props'
 import {
   PropagationEvent,
   withStopPropagation,
 } from '../../utils/with-stop-propagation'
+import Button from '../button'
 
 const classPrefix = `adm-swipe-action`
 
+type SideType = 'left' | 'right'
+
 export type SwipeActionRef = {
   close: () => void
-  show: (side?: 'left' | 'right') => void
+  show: (side?: SideType) => void
 }
 
 type ActionColor =
@@ -47,7 +49,8 @@ export type SwipeActionProps = {
   closeOnAction?: boolean
   children: ReactNode
   stopPropagation?: PropagationEvent[]
-  onActionsReveal?: (side: 'left' | 'right') => void
+  onActionsReveal?: (side: SideType) => void
+  onClose?: () => void
 } & NativeProps<'--background'>
 
 const defaultProps = {
@@ -141,7 +144,6 @@ export const SwipeAction = forwardRef<SwipeActionRef, SwipeActionProps>(
             right: leftWidth,
           }
         },
-        // rubberband: true,
         axis: 'x',
         preventScroll: true,
         pointer: { touch: true },
@@ -149,15 +151,16 @@ export const SwipeAction = forwardRef<SwipeActionRef, SwipeActionProps>(
       }
     )
 
-    function close() {
+    const close = () => {
       api.start({
         x: 0,
       })
       forceCancelDrag()
+      props.onClose?.()
     }
 
     useImperativeHandle(ref, () => ({
-      show: (side: 'left' | 'right' = 'right') => {
+      show: (side: SideType = 'right') => {
         if (side === 'right') {
           api.start({
             x: -getRightWidth(),

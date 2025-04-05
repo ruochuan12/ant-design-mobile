@@ -1,5 +1,5 @@
-import { FC, ReactNode, ReactElement, ComponentProps } from 'react'
-import React from 'react'
+import React, { isValidElement } from 'react'
+import type { FC, ReactNode, ReactElement } from 'react'
 import classNames from 'classnames'
 import { NativeProps, withNativeProps } from '../../utils/native-props'
 import { mergeProps } from '../../utils/with-default-props'
@@ -12,6 +12,7 @@ export type TabBarItemProps = {
   icon?: ReactNode | ((active: boolean) => ReactNode)
   title?: ReactNode | ((active: boolean) => ReactNode)
   badge?: BadgeProps['content']
+  onClick?: () => void
 } & NativeProps
 
 /* istanbul ignore next */
@@ -24,7 +25,7 @@ export type TabBarProps = {
   defaultActiveKey?: string | null
   onChange?: (key: string) => void
   safeArea?: boolean
-  children?: React.ReactNode
+  children?: ReactNode
 } & NativeProps
 
 const classPrefix = `adm-tab-bar`
@@ -38,10 +39,10 @@ export const TabBar: FC<TabBarProps> = p => {
 
   let firstActiveKey: string | null = null
 
-  const items: ReactElement<ComponentProps<typeof TabBarItem>>[] = []
+  const items: ReactElement<TabBarItemProps>[] = []
 
   traverseReactNode(props.children, (child, index) => {
-    if (!React.isValidElement(child)) return
+    if (!isValidElement<TabBarItemProps>(child)) return
     const key = child.key
     if (typeof key !== 'string') return
     if (index === 0) {
@@ -117,8 +118,11 @@ export const TabBar: FC<TabBarProps> = p => {
               key={item.key}
               onClick={() => {
                 const { key } = item
+
                 if (key === undefined || key === null) return
+
                 setActiveKey(key.toString())
+                item.props.onClick?.()
               }}
               className={classNames(`${classPrefix}-item`, {
                 [`${classPrefix}-item-active`]: active,

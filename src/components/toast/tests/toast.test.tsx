@@ -1,11 +1,11 @@
 import React, { useRef } from 'react'
 import {
-  render,
+  act,
   fireEvent,
+  render,
+  screen,
   waitFor,
   waitForElementToBeRemoved,
-  act,
-  screen,
 } from 'testing'
 import Toast, { ToastHandler } from '..'
 
@@ -60,20 +60,18 @@ describe('Toast', () => {
     fireEvent.click(getByText('success'))
     await waitForContentShow('content success')
     expect(
-      document.querySelectorAll(`.${classPrefix}-icon-success`)[0]
+      document.getElementById('CheckOutline-CheckOutline')
     ).toBeInTheDocument()
 
     fireEvent.click(getByText('fail'))
     await waitForContentShow('content fail')
     expect(
-      document.querySelectorAll(`.${classPrefix}-icon-fail`)[0]
+      document.getElementById('CloseOutline-CloseOutline')
     ).toBeInTheDocument()
 
     fireEvent.click(getByText('loading'))
     await waitForContentShow('content loading')
-    expect(
-      document.querySelectorAll(`.${classPrefix}-loading`)[0]
-    ).toBeInTheDocument()
+    expect(document.querySelector('.adm-spin-loading')).toBeInTheDocument()
   })
 
   test('custom icon', async () => {
@@ -244,6 +242,28 @@ describe('Toast', () => {
             duration: 0,
           })
           Toast.clear()
+          Toast.show({
+            content: 'content2',
+            duration: 0,
+          })
+        }}
+      >
+        btn
+      </button>
+    )
+    fireEvent.click(getByText('btn'))
+    await waitForContentShow('content2')
+    expect(document.querySelectorAll(`.${classPrefix}-main`).length)
+  })
+
+  test('multiple toasts should show last one', async () => {
+    const { getByText } = render(
+      <button
+        onClick={() => {
+          Toast.show({
+            content: 'content',
+            duration: 0,
+          })
           Toast.show({
             content: 'content2',
             duration: 0,

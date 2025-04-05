@@ -14,6 +14,16 @@ export { default as Button } from './components/button'
 export type { ButtonProps, ButtonRef } from './components/button'
 export { default as Calendar } from './components/calendar'
 export type { CalendarProps, CalendarRef } from './components/calendar'
+export { default as CalendarPicker } from './components/calendar-picker'
+export type {
+  CalendarPickerProps,
+  CalendarPickerRef,
+} from './components/calendar-picker'
+export { default as CalendarPickerView } from './components/calendar-picker-view'
+export type {
+  CalendarPickerViewProps,
+  CalendarPickerViewRef,
+} from './components/calendar-picker-view'
 export { default as CapsuleTabs } from './components/capsule-tabs'
 export type {
   CapsuleTabsProps,
@@ -51,7 +61,7 @@ export type {
 } from './components/checkbox'
 export { default as Collapse } from './components/collapse'
 export type { CollapseProps, CollapsePanelProps } from './components/collapse'
-export { default as ConfigProvider } from './components/config-provider'
+export { default as ConfigProvider, useConfig } from './components/config-provider'
 export type { ConfigProviderProps } from './components/config-provider'
 export { default as DatePicker } from './components/date-picker'
 export type { DatePickerProps, DatePickerRef } from './components/date-picker'
@@ -100,6 +110,7 @@ export { default as ImageUploader } from './components/image-uploader'
 export type {
   ImageUploaderProps,
   ImageUploadItem,
+  ImageUploaderRef,
 } from './components/image-uploader'
 export { default as ImageViewer } from './components/image-viewer'
 export type {
@@ -177,6 +188,8 @@ export { default as ScrollMask } from './components/scroll-mask'
 export type { ScrollMaskProps } from './components/scroll-mask'
 export { default as SearchBar } from './components/search-bar'
 export type { SearchBarProps, SearchBarRef } from './components/search-bar'
+export { default as Segmented } from './components/segmented'
+export type { SegmentedProps, SegmentedValue } from './components/segmented'
 export { default as Selector } from './components/selector'
 export type { SelectorProps, SelectorOption } from './components/selector'
 export { default as SideBar } from './components/side-bar'

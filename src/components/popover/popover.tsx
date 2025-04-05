@@ -1,40 +1,41 @@
+import {
+  arrow,
+  autoUpdate,
+  computePosition,
+  flip,
+  hide,
+  limitShift,
+  offset,
+  shift,
+} from '@floating-ui/dom'
+import { useClickAway, useIsomorphicLayoutEffect } from 'ahooks'
+import classNames from 'classnames'
+import type { ReactElement, ReactNode } from 'react'
 import React, {
   forwardRef,
+  useEffect,
   useImperativeHandle,
-  ReactElement,
   useRef,
   useState,
-  useEffect,
 } from 'react'
-import classNames from 'classnames'
+import { convertPx } from '../../utils/convert-px'
+import { NativeProps, withNativeProps } from '../../utils/native-props'
+import {
+  GetContainer,
+  renderToContainer,
+} from '../../utils/render-to-container'
+import { useShouldRender } from '../../utils/should-render'
 import { usePropsValue } from '../../utils/use-props-value'
 import { mergeProps } from '../../utils/with-default-props'
-import { NativeProps, withNativeProps } from '../../utils/native-props'
 import {
   PropagationEvent,
   withStopPropagation,
 } from '../../utils/with-stop-propagation'
 import { Arrow } from './arrow'
-import {
-  GetContainer,
-  renderToContainer,
-} from '../../utils/render-to-container'
-import {
-  arrow,
-  computePosition,
-  flip,
-  offset,
-  autoUpdate,
-  hide,
-  shift,
-  limitShift,
-} from '@floating-ui/dom'
-import { Wrapper } from './wrapper'
-import { useShouldRender } from '../../utils/should-render'
-import { useClickAway, useIsomorphicLayoutEffect } from 'ahooks'
 import { DeprecatedPlacement, Placement } from './index'
 import { normalizePlacement } from './normalize-placement'
-import { convertPx } from '../../utils/convert-px'
+import { Wrapper } from './wrapper'
+
 const classPrefix = `adm-popover`
 
 export type PopoverProps = {
@@ -48,7 +49,7 @@ export type PopoverProps = {
   trigger?: 'click'
   placement?: Placement | DeprecatedPlacement
   stopPropagation?: PropagationEvent[]
-  content: React.ReactNode
+  content: ReactNode
 } & NativeProps<'--z-index' | '--arrow-size'>
 
 export type PopoverRef = {
@@ -62,11 +63,11 @@ const defaultProps = {
   defaultVisible: false,
   stopPropagation: ['click'],
   getContainer: () => document.body,
+  mode: 'light',
 }
 
 export const Popover = forwardRef<PopoverRef, PopoverProps>((p, ref) => {
   const props = mergeProps(defaultProps, p)
-  const { mode = 'light' } = props
   const placement = normalizePlacement(props.placement)
 
   const [visible, setVisible] = usePropsValue<boolean>({
@@ -77,13 +78,11 @@ export const Popover = forwardRef<PopoverRef, PopoverProps>((p, ref) => {
 
   useImperativeHandle(
     ref,
-    () => {
-      return {
-        show: () => setVisible(true),
-        hide: () => setVisible(false),
-        visible,
-      }
-    },
+    () => ({
+      show: () => setVisible(true),
+      hide: () => setVisible(false),
+      visible,
+    }),
     [visible]
   )
 
@@ -96,11 +95,9 @@ export const Popover = forwardRef<PopoverRef, PopoverProps>((p, ref) => {
     withNativeProps(
       props,
       <div
-        className={classNames(
-          classPrefix,
-          `${classPrefix}-${mode}`,
-          !visible && `${classPrefix}-hidden`
-        )}
+        className={classNames(classPrefix, `${classPrefix}-${props.mode}`, {
+          [`${classPrefix}-hidden`]: !visible,
+        })}
         ref={floatingRef}
       >
         <div className={`${classPrefix}-arrow`} ref={arrowRef}>
@@ -190,11 +187,11 @@ export const Popover = forwardRef<PopoverRef, PopoverProps>((p, ref) => {
 
   useEffect(() => {
     const floatingElement = floatingRef.current
-    if (!targetElement || !floatingElement) return
+    if (!targetElement || !floatingElement || !visible) return
     return autoUpdate(targetElement, floatingElement, update, {
       elementResize: typeof ResizeObserver !== 'undefined',
     })
-  }, [targetElement])
+  }, [targetElement, visible])
 
   useClickAway(
     () => {

@@ -1,26 +1,26 @@
-import React, { FC, useContext, useCallback, useState, useRef } from 'react'
+import { QuestionCircleOutline } from 'antd-mobile-icons'
 import classNames from 'classnames'
-import { NativeProps, withNativeProps } from '../../utils/native-props'
 import { Field, FormInstance } from 'rc-field-form'
 import type { FieldProps } from 'rc-field-form/lib/Field'
 import FieldContext from 'rc-field-form/lib/FieldContext'
-import type { Meta, InternalNamePath } from 'rc-field-form/lib/interface'
+import type { InternalNamePath, Meta } from 'rc-field-form/lib/interface'
+import type { FC, MutableRefObject, ReactNode } from 'react'
+import React, { useCallback, useContext, useRef, useState } from 'react'
 import { devWarning } from '../../utils/dev-log'
-import { FormContext, NoStyleItemContext } from './context'
-import { toArray, isSafeSetRefComponent } from './utils'
-import List, { ListItemProps } from '../list'
-import type { FormLayout } from './index'
-import Popover from '../popover'
-import { QuestionCircleOutline } from 'antd-mobile-icons'
-import { useConfig } from '../config-provider'
+import { NativeProps, withNativeProps } from '../../utils/native-props'
 import { undefinedFallback } from '../../utils/undefined-fallback'
+import { mergeProps } from '../../utils/with-default-props'
+import { useConfig } from '../config-provider'
+import List, { ListItemProps } from '../list'
+import Popover from '../popover'
+import { FormContext, NoStyleItemContext } from './context'
+import type { FormLayout } from './index'
+import { isSafeSetRefComponent, toArray } from './utils'
 
 const NAME_SPLIT = '__SPLIT__'
 
-type RenderChildren<Values = any> = (
-  form: FormInstance<Values>
-) => React.ReactNode
-type ChildrenType<Values = any> = RenderChildren<Values> | React.ReactNode
+type RenderChildren<Values = any> = (form: FormInstance<Values>) => ReactNode
+type ChildrenType<Values = any> = RenderChildren<Values> | ReactNode
 
 type RcFieldProps = Omit<FieldProps, 'children'>
 
@@ -45,10 +45,11 @@ export type FormItemProps = Pick<
 > &
   Pick<
     ListItemProps,
-    'style' | 'extra' | 'clickable' | 'arrow' | 'description'
+    'style' | 'extra' | 'clickable' | 'arrow' | 'arrowIcon' | 'description'
   > & {
-    label?: React.ReactNode
-    help?: React.ReactNode
+    label?: ReactNode
+    help?: ReactNode
+    helpIcon?: ReactNode
     hasFeedback?: boolean
     required?: boolean
     noStyle?: boolean
@@ -57,16 +58,13 @@ export type FormItemProps = Pick<
     layout?: FormLayout
     childElementPosition?: 'normal' | 'right'
     children?: ChildrenType
-    onClick?: (
-      e: React.MouseEvent,
-      widgetRef: React.MutableRefObject<any>
-    ) => void
+    onClick?: (e: React.MouseEvent, widgetRef: MutableRefObject<any>) => void
   } & NativeProps
 
 interface MemoInputProps {
   value: any
   update: number
-  children: React.ReactNode
+  children: ReactNode
 }
 
 const MemoInput = React.memo(
@@ -83,11 +81,13 @@ type FormItemLayoutProps = Pick<
   | 'disabled'
   | 'label'
   | 'help'
+  | 'helpIcon'
   | 'hidden'
   | 'layout'
   | 'extra'
   | 'clickable'
   | 'arrow'
+  | 'arrowIcon'
   | 'description'
   | 'childElementPosition'
 > & {
@@ -95,27 +95,28 @@ type FormItemLayoutProps = Pick<
   htmlFor?: string
   errors: string[]
   warnings: string[]
-  children: React.ReactNode
+  children: ReactNode
 } & NativeProps
 
-const FormItemLayout: React.FC<FormItemLayoutProps> = props => {
+const FormItemLayout: FC<FormItemLayoutProps> = props => {
+  const { locale, form: componentConfig = {} } = useConfig()
+
   const {
-    className,
     style,
     extra,
     label,
     help,
+    helpIcon,
     required,
     children,
     htmlFor,
     hidden,
     arrow,
+    arrowIcon,
     childElementPosition = 'normal',
-  } = props
+  } = mergeProps(componentConfig, props)
 
   const context = useContext(FormContext)
-
-  const { locale } = useConfig()
 
   const hasFeedback =
     props.hasFeedback !== undefined ? props.hasFeedback : context.hasFeedback
@@ -154,7 +155,7 @@ const FormItemLayout: React.FC<FormItemLayoutProps> = props => {
     }
   })()
 
-  const labelElement = label ? (
+  const labelElement = !!label && (
     <label className={`${classPrefix}-label`} htmlFor={htmlFor}>
       {label}
       {requiredMark}
@@ -163,42 +164,42 @@ const FormItemLayout: React.FC<FormItemLayoutProps> = props => {
           <span
             className={`${classPrefix}-label-help`}
             onClick={e => {
+              e.stopPropagation()
               e.preventDefault()
             }}
           >
-            <QuestionCircleOutline />
+            {helpIcon || <QuestionCircleOutline />}
           </span>
         </Popover>
       )}
     </label>
-  ) : null
+  )
 
-  const description =
-    props.description || hasFeedback ? (
-      <>
-        {props.description}
-        {hasFeedback && (
-          <>
-            {props.errors.map((error, index) => (
-              <div
-                key={`error-${index}`}
-                className={`${classPrefix}-feedback-error`}
-              >
-                {error}
-              </div>
-            ))}
-            {props.warnings.map((warning, index) => (
-              <div
-                key={`warning-${index}`}
-                className={`${classPrefix}-feedback-warning`}
-              >
-                {warning}
-              </div>
-            ))}
-          </>
-        )}
-      </>
-    ) : null
+  const description = (!!props.description || hasFeedback) && (
+    <>
+      {props.description}
+      {hasFeedback && (
+        <>
+          {props.errors.map((error, index) => (
+            <div
+              key={`error-${index}`}
+              className={`${classPrefix}-feedback-error`}
+            >
+              {error}
+            </div>
+          ))}
+          {props.warnings.map((warning, index) => (
+            <div
+              key={`warning-${index}`}
+              className={`${classPrefix}-feedback-warning`}
+            >
+              {warning}
+            </div>
+          ))}
+        </>
+      )}
+    </>
+  )
 
   return withNativeProps(
     props,
@@ -208,19 +209,14 @@ const FormItemLayout: React.FC<FormItemLayoutProps> = props => {
       prefix={layout === 'horizontal' && labelElement}
       extra={extra}
       description={description}
-      className={classNames(
-        classPrefix,
-        className,
-        `${classPrefix}-${layout}`,
-        {
-          [`${classPrefix}-hidden`]: hidden,
-          [`${classPrefix}-has-error`]: props.errors.length,
-        }
-      )}
+      className={classNames(classPrefix, `${classPrefix}-${layout}`, {
+        [`${classPrefix}-hidden`]: hidden,
+        [`${classPrefix}-has-error`]: props.errors.length,
+      })}
       disabled={disabled}
       onClick={props.onClick}
       clickable={props.clickable}
-      arrow={arrow}
+      arrowIcon={arrowIcon || arrow}
     >
       <div
         className={classNames(
@@ -239,11 +235,11 @@ const FormItemLayout: React.FC<FormItemLayoutProps> = props => {
 export const FormItem: FC<FormItemProps> = props => {
   const {
     // 样式相关
-    className,
     style,
     // FormItem 相关
     label,
     help,
+    helpIcon,
     extra,
     hasFeedback,
     name,
@@ -265,6 +261,7 @@ export const FormItem: FC<FormItemProps> = props => {
     dependencies,
     clickable,
     arrow,
+    arrowIcon,
     ...fieldProps
   } = props
 
@@ -300,7 +297,7 @@ export const FormItem: FC<FormItemProps> = props => {
   )
 
   function renderLayout(
-    baseChildren: React.ReactNode,
+    baseChildren: ReactNode,
     fieldId?: string,
     meta?: Meta,
     isRequired?: boolean
@@ -335,11 +332,11 @@ export const FormItem: FC<FormItemProps> = props => {
     return withNativeProps(
       props,
       <FormItemLayout
-        className={className}
         style={style}
         label={label}
         extra={extra}
         help={help}
+        helpIcon={helpIcon}
         description={description}
         required={isRequired}
         disabled={disabled}
@@ -353,6 +350,7 @@ export const FormItem: FC<FormItemProps> = props => {
         childElementPosition={childElementPosition}
         clickable={clickable}
         arrow={arrow}
+        arrowIcon={arrowIcon}
       >
         <NoStyleItemContext.Provider value={onSubMetaChange}>
           {baseChildren}
@@ -394,7 +392,7 @@ export const FormItem: FC<FormItemProps> = props => {
       messageVariables={Variables}
     >
       {(control, meta, context) => {
-        let childNode: React.ReactNode = null
+        let childNode: ReactNode = null
 
         const isRequired =
           required !== undefined

@@ -1,4 +1,5 @@
-import React, { FC, memo, useContext } from 'react'
+import React, { memo, useContext } from 'react'
+import type { FC, ReactNode } from 'react'
 import { FieldContext, useWatch } from 'rc-field-form'
 import { useUpdate } from 'ahooks'
 import type { FormInstance } from 'rc-field-form'
@@ -8,7 +9,7 @@ import { useIsomorphicUpdateLayoutEffect } from '../../utils/use-isomorphic-upda
 type RenderChildren<Values = any> = (
   changedValues: Record<string, any>,
   form: FormInstance<Values>
-) => React.ReactNode
+) => ReactNode
 type ChildrenType<Values = any> = RenderChildren<Values>
 
 export interface FormSubscribeProps {
@@ -19,9 +20,18 @@ export interface FormSubscribeProps {
 export const FormSubscribe: FC<FormSubscribeProps> = props => {
   const update = useUpdate()
   const form = useContext(FieldContext)
+
+  const value = form.getFieldsValue(props.to)
+
+  // Memo to avoid useless render
+  const childNode = React.useMemo(
+    () => props.children(value, form),
+    [JSON.stringify(value), props.children]
+  )
+
   return (
     <>
-      {props.children(form.getFieldsValue(props.to), form)}
+      {childNode}
       {props.to.map(namePath => (
         <Watcher
           key={namePath.toString()}

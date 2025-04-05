@@ -52,7 +52,7 @@ describe('ActionSheet', () => {
     await waitFor(() =>
       // end of animation
       expect(baseElement.querySelectorAll('.adm-popup-body')[0]).toHaveStyle(
-        'transform: none;'
+        'transform: translate(0, 0%);'
       )
     )
 
@@ -231,5 +231,22 @@ describe('ActionSheet', () => {
       fireEvent.click(getByText('取消'))
     })
     expect(onClose).toBeCalled()
+  })
+
+  test('should support styles', () => {
+    render(
+      <ActionSheet
+        visible
+        actions={actions}
+        styles={{
+          body: { fontSize: 17 },
+          mask: { fontSize: 18 },
+        }}
+      />
+    )
+    expect(document.querySelector('.adm-mask')).toHaveStyle('fontSize: 17')
+    expect(document.querySelector('.adm-popup-body')).toHaveStyle(
+      'fontSize: 18'
+    )
   })
 })

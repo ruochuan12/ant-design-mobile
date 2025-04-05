@@ -1,9 +1,8 @@
-import { mergeLocale } from '../utils/merge-locale'
-import { base } from './base'
+import { Locale } from './base'
 
 const typeTemplate = '${label}不是一个有效的${type}'
 
-const zhCN = mergeLocale(base, {
+const zhCN: Locale = {
   locale: 'zh-CH',
   common: {
     confirm: '确定',
@@ -12,8 +11,13 @@ const zhCN = mergeLocale(base, {
     close: '关闭',
   },
   Calendar: {
+    title: '日期选择',
+    confirm: '确认',
+    start: '开始',
+    end: '结束',
+    today: '今日',
     markItems: ['一', '二', '三', '四', '五', '六', '日'],
-    renderYearAndMonth: (year: number, month: number) => `${year}年${month}月`,
+    yearAndMonth: '${year}年${month}月',
   },
   Cascader: {
     placeholder: '请选择',
@@ -135,6 +139,6 @@ const zhCN = mergeLocale(base, {
   Selector: {
     name: '选择组',
   },
-})
+}
 
 export default zhCN

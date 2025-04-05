@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import { act } from '@testing-library/react'
 import React from 'react'
 import {
-  render,
-  testA11y,
   fireEvent,
+  render,
+  screen,
+  testA11y,
+  waitFakeTimers,
   waitFor,
   waitForElementToBeRemoved,
-  screen,
 } from 'testing'
 import Dialog, { DialogAlertProps } from '..'
-import { act } from '@testing-library/react'
 
 const classPrefix = `adm-dialog`
 
@@ -65,8 +68,11 @@ describe('Dialog', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'btn' }))
-    const mask = await screen.findByRole('button', { name: '背景蒙层' })
+    await waitFakeTimers()
+
+    const mask = document.querySelector('.adm-mask-aria-button')!
     fireEvent.click(mask)
+
     await waitForElementToBeRemoved(mask)
     expect(onClose).toBeCalled()
     expect(afterClose).toBeCalled()
@@ -114,38 +120,44 @@ describe('Dialog', () => {
     expect(fn).toBeCalled()
   })
 
-  test('wait for confirm to complete', async () => {
-    const fn = jest.fn()
-    const Confirm = () => (
-      <button
-        onClick={async () => {
-          const res = await Dialog.confirm({
-            content: 'content',
-          })
-          fn(res)
-        }}
-      >
-        btn
-      </button>
-    )
+  describe('wait for confirm to complete', () => {
+    function testFn(button: string, result: boolean) {
+      test(`wait for confirm to complete (${String(result)})`, async () => {
+        jest.useFakeTimers()
 
-    render(<Confirm />)
-    const btn = screen.getByRole('button', { name: 'btn' })
-    fireEvent.click(btn)
-    const dialog = screen.getByRole('dialog')
-    fireEvent.click(screen.getByRole('button', { name: '确定' }))
-    await act(async () => {
-      await Promise.resolve()
-    })
-    expect(fn.mock.calls[0][0]).toBe(true)
-    await waitForElementToBeRemoved(dialog)
+        const fn = jest.fn()
+        const Confirm = () => (
+          <button
+            onClick={async () => {
+              const res = await Dialog.confirm({
+                content: 'content',
+              })
+              fn(res)
+            }}
+          >
+            btn
+          </button>
+        )
 
-    fireEvent.click(btn)
-    fireEvent.click(screen.getByRole('button', { name: '取消' }))
-    await act(async () => {
-      await Promise.resolve()
-    })
-    expect(fn.mock.calls[1][0]).toBe(false)
+        render(<Confirm />)
+
+        // First click to open
+        const btn = screen.getByRole('button', { name: 'btn' })
+        fireEvent.click(btn)
+        await waitFakeTimers()
+
+        // Click confirm
+        fireEvent.click(screen.getByRole('button', { name: button }))
+        expect(fn).not.toHaveBeenCalled()
+        await waitFakeTimers()
+        expect(fn).toHaveBeenCalledWith(result)
+
+        jest.useRealTimers()
+      })
+    }
+
+    testFn('确定', true)
+    testFn('取消', false)
   })
 
   test('custom actions', async () => {

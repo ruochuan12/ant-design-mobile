@@ -21,7 +21,7 @@ Narrow down the information pool to get targeted information quickly and easily.
 | cancelText | Text of the cancel button | `string` | `'取消'` |
 | clearOnCancel | Whether to clear the input after the cancel button is clicked | `boolean` | `true` |
 | clearable | Whether to enable the clear icon, the input would be cleared after the clear icon is clicked | `boolean` | `true` |
-| icon | Icon | `ReactNode` | `<SearchOutline />` |
+| searchIcon | Custom search icon | `ReactNode` | `<SearchOutline />` |
 | maxLength | The maximum number of characters the user can enter | `number` | - |
 | onBlur | Triggered when the input lose focus | `(e: React.FocusEvent<HTMLInputElement>) => void` | - |
 | onCancel | Triggered when the cancel button is clicked | `() => void` | - |
@@ -33,6 +33,8 @@ Narrow down the information pool to get targeted information quickly and easily.
 | placeholder | Hint text | `string` | - |
 | showCancelButton | Whether to display the cancel button on the right side of the search input | `boolean \| ((focus: boolean, value: string) => boolean)` | `false` |
 | value | Input value | `string` | - |
+
+In addition, the following native attributes are supported: `onCompositionStart` `onCompositionEnd` `autoFocus`
 
 ### CSS Variables
 

@@ -1,18 +1,24 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react'
+import { animated, useSpring } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
-import { useSpring, animated } from '@react-spring/web'
-import { Slide } from './slide'
-import { convertPx } from '../../utils/convert-px'
+import React, {
+  ReactNode,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from 'react'
 import { bound } from '../../utils/bound'
+import { convertPx } from '../../utils/convert-px'
+import { Slide } from './slide'
 
 const classPrefix = `adm-image-viewer`
 
 export type SlidesType = {
   images: string[]
-  onTap: () => void
+  onTap?: () => void
   maxZoom: number
   defaultIndex: number
   onIndexChange?: (index: number) => void
+  imageRender?: (image: string, { index }: { index: number }) => ReactNode
 }
 export type SlidesRef = {
   swipeTo: (index: number, immediate?: boolean) => void
@@ -67,12 +73,10 @@ export const Slides = forwardRef<SlidesRef, SlidesType>((props, ref) => {
     {
       transform: ([x, y]) => [-x, y],
       from: () => [x.get(), 0],
-      bounds: () => {
-        return {
-          left: 0,
-          right: (count - 1) * slideWidth,
-        }
-      },
+      bounds: () => ({
+        left: 0,
+        right: (count - 1) * slideWidth,
+      }),
       rubberband: true,
       axis: 'x',
       pointer: { touch: true },
@@ -97,6 +101,8 @@ export const Slides = forwardRef<SlidesRef, SlidesType>((props, ref) => {
             image={image}
             onTap={props.onTap}
             maxZoom={props.maxZoom}
+            imageRender={props.imageRender}
+            index={index}
             onZoomChange={zoom => {
               if (zoom !== 1) {
                 const index: number = Math.round(x.get() / slideWidth)

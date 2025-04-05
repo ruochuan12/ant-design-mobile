@@ -1,12 +1,13 @@
-import React, { ReactNode, useMemo } from 'react'
-import classNames from 'classnames'
 import { CheckOutline, CloseOutline } from 'antd-mobile-icons'
-import Mask from '../mask'
-import type { MaskProps } from '../mask'
+import classNames from 'classnames'
+import type { FC, ReactNode } from 'react'
+import React, { useMemo } from 'react'
+import { GetContainer } from '../../utils/render-to-container'
 import { mergeProps } from '../../utils/with-default-props'
 import { PropagationEvent } from '../../utils/with-stop-propagation'
-import { GetContainer } from '../../utils/render-to-container'
 import AutoCenter from '../auto-center'
+import type { MaskProps } from '../mask'
+import Mask from '../mask'
 import SpinLoading from '../spin-loading'
 
 const classPrefix = `adm-toast`
@@ -17,7 +18,7 @@ export interface ToastProps {
   maskClassName?: string
   maskClickable?: boolean
   content?: ReactNode
-  icon?: 'success' | 'fail' | 'loading' | React.ReactNode
+  icon?: 'success' | 'fail' | 'loading' | ReactNode
   duration?: number
   position?: 'top' | 'bottom' | 'center'
   visible?: boolean
@@ -30,7 +31,7 @@ const defaultProps = {
   stopPropagation: ['click'],
 }
 
-export const InternalToast: React.FC<ToastProps> = p => {
+export const InternalToast: FC<ToastProps> = p => {
   const props = mergeProps(defaultProps, p)
   const { maskClickable, content, icon, position } = props
 

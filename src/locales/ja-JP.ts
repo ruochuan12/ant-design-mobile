@@ -12,13 +12,13 @@ const jaJP = mergeLocale(base, {
   },
   Calendar: {
     markItems: ['月', '火', '水', '木', '金', '土', '日'],
-    renderYearAndMonth: (year: number, month: number) => ` ${year}年${month}月`,
+    yearAndMonth: '${year}年${month}月',
   },
   Cascader: {
     placeholder: '選択下さい',
   },
   Dialog: {
-    ok: 'わかりました',
+    ok: '了解',
   },
   ErrorBlock: {
     default: {
@@ -105,7 +105,7 @@ const jaJP = mergeLocale(base, {
     name: 'マスク',
   },
   Modal: {
-    ok: 'わかりました',
+    ok: '了解',
   },
   PasscodeInput: {
     name: 'パスコード入力',

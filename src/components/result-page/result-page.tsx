@@ -1,26 +1,13 @@
-import React, { FC, ReactNode, useState } from 'react'
-import {
-  CheckCircleFill,
-  CloseCircleFill,
-  InformationCircleFill,
-  ClockCircleFill,
-  ExclamationCircleFill,
-} from 'antd-mobile-icons'
+import React, { useState } from 'react'
+import type { FC, ReactNode } from 'react'
 import classNames from 'classnames'
 import { NativeProps, withNativeProps } from '../../utils/native-props'
 import { mergeProps } from '../../utils/with-default-props'
 import { isNodeWithContent } from '../../utils/is-node-with-content'
 import Button from '../button'
+import { useResultIcon } from '../result/use-result-icon'
 
 const classPrefix = `adm-result-page`
-
-const iconRecord = {
-  success: CheckCircleFill,
-  error: CloseCircleFill,
-  info: InformationCircleFill,
-  waiting: ClockCircleFill,
-  warning: ExclamationCircleFill,
-}
 
 interface ResultPageDetail {
   label: ReactNode
@@ -32,14 +19,14 @@ type ResultPageDetails = ResultPageDetail[]
 
 type OnClick = (
   event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-) => void | Promise<void> | unknown
+) => void | Promise<void>
 
 export type ResultPageProps = {
   status?: 'success' | 'error' | 'info' | 'waiting' | 'warning'
   title: ReactNode
   description?: ReactNode
   icon?: ReactNode
-  details?: ResultPageDetails
+  details?: ResultPageDetails | null
   children?: ReactNode
   primaryButtonText?: ReactNode
   secondaryButtonText?: ReactNode
@@ -65,7 +52,7 @@ export const ResultPage: FC<ResultPageProps> = p => {
     onPrimaryButtonClick,
     onSecondaryButtonClick,
   } = props
-  const resultIcon = icon || React.createElement(iconRecord[status])
+  const fallbackIcon = useResultIcon(status)
 
   const [collapse, setCollapse] = useState(true)
 
@@ -76,12 +63,12 @@ export const ResultPage: FC<ResultPageProps> = p => {
     props,
     <div className={classPrefix}>
       <div className={`${classPrefix}-header`}>
-        <div className={`${classPrefix}-icon`}>{resultIcon}</div>
+        <div className={`${classPrefix}-icon`}>{icon || fallbackIcon}</div>
         <div className={`${classPrefix}-title`}>{title}</div>
         {isNodeWithContent(description) ? (
           <div className={`${classPrefix}-description`}>{description}</div>
         ) : null}
-        {details.length ? (
+        {details?.length ? (
           <div className={`${classPrefix}-details`}>
             {(collapse ? details.slice(0, 3) : details).map((detail, index) => {
               return (
@@ -116,35 +103,37 @@ export const ResultPage: FC<ResultPageProps> = p => {
 
       <div className={`${classPrefix}-content`}>{props.children}</div>
 
-      <div className={`${classPrefix}-footer`}>
-        {showSecondaryButton && (
-          <Button
-            block
-            color='default'
-            fill='solid'
-            size='large'
-            onClick={onSecondaryButtonClick}
-            className={`${classPrefix}-footer-btn`}
-          >
-            {secondaryButtonText}
-          </Button>
-        )}
-        {showPrimaryButton && showSecondaryButton && (
-          <div className={`${classPrefix}-footer-space`} />
-        )}
-        {showPrimaryButton && (
-          <Button
-            block
-            color='primary'
-            fill='solid'
-            size='large'
-            onClick={onPrimaryButtonClick}
-            className={`${classPrefix}-footer-btn`}
-          >
-            {primaryButtonText}
-          </Button>
-        )}
-      </div>
+      {(showPrimaryButton || showSecondaryButton) && (
+        <div className={`${classPrefix}-footer`}>
+          {showSecondaryButton && (
+            <Button
+              block
+              color='default'
+              fill='solid'
+              size='large'
+              onClick={onSecondaryButtonClick}
+              className={`${classPrefix}-footer-btn`}
+            >
+              {secondaryButtonText}
+            </Button>
+          )}
+          {showPrimaryButton && showSecondaryButton && (
+            <div className={`${classPrefix}-footer-space`} />
+          )}
+          {showPrimaryButton && (
+            <Button
+              block
+              color='primary'
+              fill='solid'
+              size='large'
+              onClick={onPrimaryButtonClick}
+              className={`${classPrefix}-footer-btn`}
+            >
+              {primaryButtonText}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

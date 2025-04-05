@@ -16,6 +16,8 @@ $ npm install --save-dev next-transpile-modules
 $ yarn add -D next-transpile-modules
 # or
 $ pnpm add -D next-transpile-modules
+# or
+$ bun add -D next-transpile-modules
 ```
 
 然后在 `next.config.js` 中进行配置：
@@ -52,7 +54,7 @@ module.exports = nextConfig;
 import { Button } from 'antd-mobile'
 ```
 
-- [transpilepackages](https://beta.nextjs.org/docs/api-reference/next.config.js#transpilepackages)
+- [transpilepackages](https://beta.nextjs.org/docs/api-reference/next-config#transpilepackages)
 - [server-and-client-components](https://beta.nextjs.org/docs/rendering/server-and-client-components)
 
 ## Remix

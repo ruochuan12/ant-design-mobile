@@ -21,7 +21,7 @@
 | cancelText | 取消按钮的文案 | `string` | `'取消'` |
 | clearOnCancel | 点击取消按钮后是否清空输入框 | `boolean` | `true` |
 | clearable | 是否启用清除图标，点击清除图标后会清空输入框 | `boolean` | `true` |
-| icon | 图标 | `ReactNode` | `<SearchOutline />` |
+| searchIcon | 自定义搜索图标 | `ReactNode` | `<SearchOutline />` |
 | maxLength | 输入的最大字符数 | `number` | - |
 | onBlur | 输入框失去焦点时触发 | `(e: React.FocusEvent<HTMLInputElement>) => void` | - |
 | onCancel | 点击取消按钮时触发 | `() => void` | - |
@@ -33,6 +33,8 @@
 | placeholder | 提示文本 | `string` | - |
 | showCancelButton | 是否在搜索框右侧显示取消按钮 | `boolean \| ((focus: boolean, value: string) => boolean)` | `false` |
 | value | 输入值 | `string` | - |
+
+此外还支持以下原生属性：`onCompositionStart` `onCompositionEnd` `autoFocus`
 
 ### CSS 变量
 

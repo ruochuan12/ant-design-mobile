@@ -1,33 +1,43 @@
-import React, { useState, useRef, memo } from 'react'
-import classNames from 'classnames'
-import { CloseOutline, SoundOutline } from 'antd-mobile-icons'
 import { useTimeout } from 'ahooks'
-import { mergeProps } from '../../utils/with-default-props'
+import { CloseOutline, SoundOutline } from 'antd-mobile-icons'
+import classNames from 'classnames'
+import type { ReactNode } from 'react'
+import React, { memo, useRef, useState } from 'react'
 import { NativeProps, withNativeProps } from '../../utils/native-props'
-import { useResizeEffect } from '../../utils/use-resize-effect'
 import { useMutationEffect } from '../../utils/use-mutation-effect'
+import { useResizeEffect } from '../../utils/use-resize-effect'
+import { mergeProp, mergeProps } from '../../utils/with-default-props'
+import { useConfig } from '../config-provider'
 
 const classPrefix = `adm-notice-bar`
 
 export type NoticeBarProps = {
   /** The type of the NoticeBar */
-  color?: 'default' | 'alert' | 'error' | 'info'
+  color?: 'default' | 'alert' | 'error' | 'success' | 'info'
   /** TDelay to start scrolling, unit ms */
   delay?: number
   /** Scroll speed, unit px/s */
   speed?: number
   /** The content of the NoticeBar */
-  content: React.ReactNode
+  content: ReactNode
   /** Whether it can be closed */
   closeable?: boolean
+  /** Custom close icon */
+  closeIcon?: ReactNode
   /** Callback when closed */
   onClose?: () => void
+  /** Event when click */
+  onClick?: () => void
   /** Additional operating area, displayed to the left of the close button */
-  extra?: React.ReactNode
+  extra?: ReactNode
   /** Radio icon on the left */
-  icon?: React.ReactNode
+  icon?: ReactNode
   /** Whether to display multiple lines */
   wrap?: boolean
+  /** Block shape */
+  shape?: 'rectangular' | 'neutral' | 'rounded'
+  /** Border visibility */
+  bordered?: 'block' | boolean
 } & NativeProps<
   | '--background-color'
   | '--border-color'
@@ -41,25 +51,33 @@ const defaultProps = {
   color: 'default',
   delay: 2000,
   speed: 50,
-  wrap: false,
   icon: <SoundOutline />,
+  wrap: false,
+  shape: 'rectangular',
+  bordered: 'block' as 'block' | boolean,
 }
 
-export const NoticeBar = memo<NoticeBarProps>(p => {
-  const props = mergeProps(defaultProps, p)
+export const NoticeBar = memo<NoticeBarProps>(props => {
+  const { noticeBar: componentConfig = {} } = useConfig()
+  const mergedProps = mergeProps(defaultProps, componentConfig, props)
+  const closeIcon = mergeProp(
+    <CloseOutline className={`${classPrefix}-close-icon`} />,
+    componentConfig.closeIcon,
+    props.closeIcon
+  )
 
   const containerRef = useRef<HTMLSpanElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
 
   const [visible, setVisible] = useState(true)
 
-  const speed = props.speed
+  const speed = mergedProps.speed
 
   const delayLockRef = useRef(true)
   const animatingRef = useRef(false)
 
   function start() {
-    if (delayLockRef.current || props.wrap) return
+    if (delayLockRef.current || mergedProps.wrap) return
 
     const container = containerRef.current
     const text = textRef.current
@@ -92,7 +110,7 @@ export const NoticeBar = memo<NoticeBarProps>(p => {
   useTimeout(() => {
     delayLockRef.current = false
     start()
-  }, props.delay)
+  }, mergedProps.delay)
 
   useResizeEffect(() => {
     start()
@@ -113,14 +131,22 @@ export const NoticeBar = memo<NoticeBarProps>(p => {
   if (!visible) return null
 
   return withNativeProps(
-    props,
+    mergedProps,
     <div
-      className={classNames(classPrefix, `${classPrefix}-${props.color}`, {
-        [`${classPrefix}-wrap`]: props.wrap,
-      })}
+      className={classNames(
+        classPrefix,
+        `${classPrefix}-${mergedProps.color}`,
+        `${classPrefix}-${mergedProps.shape}`,
+        {
+          [`${classPrefix}-wrap`]: mergedProps.wrap,
+          [`${classPrefix}-bordered`]: mergedProps.bordered === true,
+          [`${classPrefix}-without-border`]: mergedProps.bordered === false,
+        }
+      )}
+      onClick={mergedProps.onClick}
     >
-      {props.icon && (
-        <span className={`${classPrefix}-left`}>{props.icon}</span>
+      {mergedProps.icon && (
+        <span className={`${classPrefix}-left`}>{mergedProps.icon}</span>
       )}
       <span ref={containerRef} className={`${classPrefix}-content`}>
         <span
@@ -131,21 +157,21 @@ export const NoticeBar = memo<NoticeBarProps>(p => {
           ref={textRef}
           className={`${classPrefix}-content-inner`}
         >
-          {props.content}
+          {mergedProps.content}
         </span>
       </span>
-      {(props.closeable || props.extra) && (
+      {(mergedProps.closeable || mergedProps.extra) && (
         <span className={`${classPrefix}-right`}>
-          {props.extra}
-          {props.closeable && (
+          {mergedProps.extra}
+          {mergedProps.closeable && (
             <div
               className={`${classPrefix}-close`}
               onClick={() => {
                 setVisible(false)
-                props.onClose?.()
+                mergedProps.onClose?.()
               }}
             >
-              <CloseOutline className={`${classPrefix}-close-icon`} />
+              {closeIcon}
             </div>
           )}
         </span>

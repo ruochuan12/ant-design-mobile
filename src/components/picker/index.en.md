@@ -43,7 +43,7 @@ type PickerValueExtend = {
 | columns | Options to configure each column | `PickerColumn[] \| ((value: PickerValue[]) => PickerColumn[])` | - |
 | confirmText | Text of the ok button | `ReactNode` | `'确定'` |
 | defaultValue | Default selected options | `PickerValue[]` | `[]` |
-| destroyOnClose | Unmount content when not visible | `boolean` | `false` |
+| destroyOnClose | Destroy `dom` when not visible | `boolean` | `false` |
 | forceRender | Render content forcely | `boolean` | `false` |
 | mouseWheel | Whether to allow interact with mouse wheel | `boolean` | `false` |
 | onCancel | Triggered when cancelling | `() => void` | - |
@@ -154,7 +154,7 @@ type PickerDate = Date & {
 | --- | --- | --- | --- | --- |
 | children | The rendering function of the selected items | `(value: PickerDate, actions: PickerActions) => ReactNode` | - |
 | defaultValue | Default selected value | `PickerDate` | - |
-| destroyOnClose | Unmount content when not visible | `boolean` | `false` |
+| destroyOnClose | Destroy `dom` when not visible | `boolean` | `false` |
 | filter | Filter available time | `DatePickerFilter` | - |
 | forceRender | Render content forcely | `boolean` | `false` |
 | max | Max value | `PickerDate` | ten years later |
@@ -162,7 +162,7 @@ type PickerDate = Date & {
 | mouseWheel | Whether to allow interact with mouse wheel | `boolean` | `false` |
 | onConfirm | Triggered when confirming | `(value: PickerDate) => void` | - |
 | onSelect | Triggered when the options are changed | `(value: PickerDate) => void` | - |
-| precision | Precision | `'year' \| 'month' \| 'day' \| 'hour' \| 'minute' \| 'second' \| 'week' \| 'week-day'` | `'day'` |
+| precision | Precision | `'year' \| 'month' \| 'day' \| 'hour' \| 'minute' \| 'second' \| 'week' \| 'week-day' \| 'quarter'` | `'day'` |
 | renderLabel | The function to custom rendering the label shown on a column. `type` means any value in `precision` or `now`, `data` means the default number | `(type: Precision \| 'now', data: number) => ReactNode` | - |
 | tillNow | Show till now in list | `boolean` | - | 5.27.0 |
 | value | Selected value | `PickerDate` | - |

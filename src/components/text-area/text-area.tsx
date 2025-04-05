@@ -1,10 +1,12 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useIsomorphicLayoutEffect } from 'ahooks'
+import runes from 'runes2'
 import { NativeProps, withNativeProps } from '../../utils/native-props'
 import { usePropsValue } from '../../utils/use-props-value'
 import { mergeProps } from '../../utils/with-default-props'
 import { devError } from '../../utils/dev-log'
+import useInputHandleKeyDown from '../../components/input/useInputHandleKeyDown'
 
 const classPrefix = 'adm-text-area'
 
@@ -23,6 +25,7 @@ export type TextAreaProps = Pick<
   | 'onCompositionStart'
   | 'onCompositionEnd'
   | 'onClick'
+  | 'onKeyDown'
 > & {
   onChange?: (val: string) => void
   value?: string
@@ -38,6 +41,15 @@ export type TextAreaProps = Pick<
         maxRows?: number
       }
   id?: string
+  onEnterPress?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  enterKeyHint?:
+    | 'enter'
+    | 'done'
+    | 'go'
+    | 'next'
+    | 'previous'
+    | 'search'
+    | 'send'
 } & NativeProps<
     | '--font-size'
     | '--color'
@@ -81,6 +93,13 @@ export const TextArea = forwardRef<TextAreaRef, TextAreaProps>(
     // https://github.com/ant-design/ant-design-mobile/issues/6051
     const hiddenTextAreaRef = useRef<HTMLTextAreaElement>(null)
 
+    const handleKeydown = useInputHandleKeyDown({
+      onEnterPress: props.onEnterPress,
+      onKeyDown: props.onKeyDown,
+      nativeInputRef: nativeTextAreaRef,
+      enterKeyHint: props.enterKeyHint,
+    })
+
     useImperativeHandle(ref, () => ({
       clear: () => {
         setValue('')
@@ -121,7 +140,7 @@ export const TextArea = forwardRef<TextAreaRef, TextAreaProps>(
     const compositingRef = useRef(false)
 
     let count
-    const valueLength = [...value].length
+    const valueLength = runes(value).length
     if (typeof showCount === 'function') {
       count = showCount(valueLength, maxLength)
     } else if (showCount) {
@@ -134,19 +153,29 @@ export const TextArea = forwardRef<TextAreaRef, TextAreaProps>(
       )
     }
 
+    let rows = props.rows
+    if (typeof autoSize === 'object') {
+      if (autoSize.maxRows && rows > autoSize.maxRows) {
+        rows = autoSize.maxRows
+      }
+      if (autoSize.minRows && rows < autoSize.minRows) {
+        rows = autoSize.minRows
+      }
+    }
+
     return withNativeProps(
       props,
       <div className={classPrefix}>
         <textarea
           ref={nativeTextAreaRef}
           className={`${classPrefix}-element`}
-          rows={props.rows}
+          rows={rows}
           value={value}
           placeholder={props.placeholder}
           onChange={e => {
             let v = e.target.value
             if (maxLength && !compositingRef.current) {
-              v = [...v].slice(0, maxLength).join('')
+              v = runes(v).slice(0, maxLength).join('')
             }
             setValue(v)
           }}
@@ -159,7 +188,7 @@ export const TextArea = forwardRef<TextAreaRef, TextAreaProps>(
             compositingRef.current = false
             if (maxLength) {
               const v = (e.target as HTMLTextAreaElement).value
-              setValue([...v].slice(0, maxLength).join(''))
+              setValue(runes(v).slice(0, maxLength).join(''))
             }
             props.onCompositionEnd?.(e)
           }}
@@ -171,6 +200,7 @@ export const TextArea = forwardRef<TextAreaRef, TextAreaProps>(
           onFocus={props.onFocus}
           onBlur={props.onBlur}
           onClick={props.onClick}
+          onKeyDown={handleKeydown}
         />
         {count}
 
@@ -179,6 +209,7 @@ export const TextArea = forwardRef<TextAreaRef, TextAreaProps>(
             ref={hiddenTextAreaRef}
             className={`${classPrefix}-element ${classPrefix}-element-hidden`}
             value={value}
+            rows={rows}
             aria-hidden
             readOnly
           />

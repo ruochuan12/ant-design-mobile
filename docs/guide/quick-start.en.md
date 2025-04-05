@@ -8,6 +8,8 @@ $ npm install --save antd-mobile
 $ yarn add antd-mobile
 # or
 $ pnpm add antd-mobile
+# or
+$ bun add antd-mobile
 ```
 
 ## Import
@@ -58,7 +60,7 @@ If you don't want to configure your environment locally, you can also try it dir
 
 ## Discussion Groups
 
-- [DingDing](https://user-images.githubusercontent.com/22469543/197447477-1f10603d-90e9-43ea-a023-6538c5cf40e2.jpeg)
+- [DingDing](https://mdn.alipayobjects.com/huamei_pdkywj/afts/img/A*nC08QYnlP68AAAAAAAAAAAAAesHxAQ/original)
 - [Discord](https://discord.gg/jmNvw4WFYn)
 
 ## Contributing
